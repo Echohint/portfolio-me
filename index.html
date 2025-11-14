@@ -1,1 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vishal Kumar - Professional Portfolio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Share Tech Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- three.js for 3D background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Favicon (Emoji) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            color: #e0e0e0;
+            background-color: #000000;
+            overflow-x: hidden;
+        }
+        /* 3D Canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        /* Neon Colors */
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-pink: #ff00ff;
+            --neon-green: #08f7fe;
+        }
+        .text-neon-blue { color: var(--neon-blue); }
+        .text-neon-pink { color: var(--neon-pink); }
+        .border-neon-blue { border-color: var(--neon-blue); }
+        .border-neon-pink { border-color: var(--neon-pink); }
+        
+        /* Cyber Card (Glassmorphism) */
+        .cyber-card {
+            background: rgba(10, 20, 35, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .cyber-card:hover {
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+        
+        /* Enhanced Project Card Hover */
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+        }
 
+        /* Cyber Button */
+        .cyber-button {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .cyber-button:hover {
+            color: #000;
+            background-color: var(--neon-blue);
+            box-shadow: 0 0 25px var(--neon-blue);
+        }
+        .cyber-button-pink {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+        .cyber-button-pink:hover {
+            background-color: var(--neon-pink);
+            box-shadow: 0 0 25px var(--neon-pink);
+        }
+
+        /* Glitch Animation */
+        .glitch {
+            animation: glitch 3s linear infinite;
+        }
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+        .glitch-2 {
+            animation: glitch-2 2.5s linear infinite;
+        }
+        @keyframes glitch-2 {
+            0% { transform: translate(0); opacity: 1; }
+            20% { transform: translate(-2px, 2px); opacity: 0.8; }
+            40% { transform: translate(2px, -2px); opacity: 0.9; }
+            60% { transform: translate(-2px, 2px); opacity: 0.7; }
+            80% { transform: translate(2px, -2px); opacity: 0.8; }
+            100% { transform: translate(0); opacity: 1; }
+        }
+
+        /* Typewriter Effect */
+        #typewriter {
+            border-right: 2px solid var(--neon-pink);
+            animation: blink-caret .75s step-end infinite;
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--neon-pink); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-pink); }
+
+        /* Section Borders & Scroll Animation */
+        section {
+            border-bottom: 1px dashed rgba(0, 240, 255, 0.2);
+            padding-bottom: 4rem;
+            padding-top: 4rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        section:last-child { border-bottom: none; }
+
+        /* Contact Icon Style */
+        .contact-icon {
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        .contact-icon:hover {
+            color: var(--neon-blue);
+            transform: scale(1.2) rotate(5deg);
+        }
+        .contact-icon-pink:hover {
+            color: var(--neon-pink);
+        }
+    </style>
+</head>
+<body class="bg-black">
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full bg-black/50 backdrop-blur-sm z-50 border-b border-neon-blue/20">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-neon-blue glitch">VISHAL KUMAR</div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#about" class="hover:text-neon-pink transition-colors">about</a>
+                <a href="#projects" class="hover:text-neon-pink transition-colors">projects</a>
+                <a href="#skills" class="hover:text-neon-pink transition-colors">skills</a>
+                <a href="#education" class="hover:text-neon-pink transition-colors">education</a>
+                <a href="#contact" class="hover:text-neon-pink transition-colors">contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="relative z-10 container mx-auto px-6">
+        
+        <!-- Hero Section -->
+        <section id="hero" class="h-screen flex items-center justify-center text-center flex-col min-h-[600px] is-visible">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-4">
+                <span class="glitch-2">VISHAL KUMAR</span>
+            </h1>
+            <h2 class="text-2xl md:text-3xl text-neon-pink mb-8">
+                // <span id="typewriter">Full-Stack Developer</span>
+            </h2>
+            <p class="text-lg md:text-xl max-w-2xl mb-10">
+                A Full-Stack Developer and Competitive Programmer specializing in the MERN stack and building efficient, scalable web applications.
+            </p>
+            <a href="#projects" class="cyber-button">
+                View My Work
+            </a>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="container mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-12 text-neon-blue">About Me</h2>
+            <div class="cyber-card p-8 md:p-12">
+                <p class="text-lg leading-relaxed">
+                    Hello! I'm Vishal, a Bachelor of Technology student at MNNIT Allahabad, majoring in ECE but with a deep passion for the **software domain**. I'm driven by the challenge of building complex, scalable systems from scratch.
+                </p>
+                <br>
+                <p class="text-lg leading-relaxed">
+                    My experience is rooted in **Full-Stack Development** using the MERN stack (MongoDB, Express.js, React.js, Node.js) and a strong foundation in **Data Structures & Algorithms** from solving 800+ problems. This competitive programming background allows me to write clean, optimized, and efficient code. I'm always eager to learn and apply new technologies to solve real-world problems.
+                </p>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects">
+            <h2 class="text-4xl font-bold text-center mb-12 text-neon-blue">Projects</h2>
+            <div class="space-y-12">
+                
+                <!-- Project 1: Psychocorp -->
+                <div class="cyber-card project-card p-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-3xl text-neon-pink mb-3">Psychocorp</h3>
+                        <p class="text-lg mb-4">Doctor Appointment Booking Website</p>
+                        <p class="mb-4 text-gray-300">
+                            A full-stack platform for patients to schedule appointments, attend secure consultations, and access medical records. Features JWT authentication, Razorpay integration, and a full admin dashboard for doctors.
+                        </p>
+                        <p class="text-sm text-neon-blue/80 mb-6">
+                            Tech: React.js, Tailwind CSS, Node.js, Express.js, MongoDB, Gemini AI API, Cloudinary, Razorpay
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="https://github.com/Echohint/PSYCHO-CORP" target="_blank" rel="noopener noreferrer" class="cyber-button">
+                                GitHub
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex justify-center items-center">
+                        <!-- Enhanced SVG Placeholder -->
+                        <svg class="w-40 h-40 text-neon-pink opacity-70 glitch-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Project 2: Food Factory -->
+                <div class="cyber-card project-card p-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-3xl text-neon-pink mb-3">Food Factory</h3>
+                        <p class="text-lg mb-4">Food Ordering Platform</p>
+                        <p class="mb-4 text-gray-300">
+                            A web app for students to order food from cafes with real-time delivery status. Features secure auth, live cart updates, category-wise navigation, and an admin dashboard for cafes.
+                        </p>
+                        <p class="text-sm text-neon-blue/80 mb-6">
+                            Tech: React.js, Tailwind CSS, Node.js, Express.js, MongoDB
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="https://github.com/Echohint/Food-Factory" target="_blank" rel="noopener noreferrer" class="cyber-button">
+                                GitHub
+                            </a>
+                            <a href="https://food-factory-frontend-6kt6.onrender.com/" target="_blank" rel="noopener noreferrer" class="cyber-button cyber-button-pink">
+                                Live Demo
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex justify-center items-center">
+                        <!-- Enhanced SVG Placeholder -->
+                        <svg class="w-40 h-40 text-neon-blue opacity-70 glitch" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Project 3: DevTrader Journal -->
+                <div class="cyber-card project-card p-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-3xl text-neon-pink mb-3">DevTrader Journal</h3>
+                        <p class="text-lg mb-4">Trading & Development Journal</p>
+                        <p class="mb-4 text-gray-300">
+                            A full-stack journaling app for traders and developers to log trades, track progress, and write development notes. Features secure user auth and rich text editing.
+                        </p>
+                        <p class="text-sm text-neon-blue/80 mb-6">
+                            Tech: MERN Stack (MongoDB, Express, React, Node.js), JWT, Tailwind CSS
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="https://github.com/Echohint/DevTrader-Journal" target="_blank" rel="noopener noreferrer" class="cyber-button">
+                                GitHub
+                            </a>
+                            <a href="https://dev-trader-journal.vercel.app/" target="_blank" rel="noopener noreferrer" class="cyber-button cyber-button-pink">
+                                Live Demo
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex justify-center items-center">
+                        <!-- Enhanced SVG Placeholder -->
+                        <svg class="w-40 h-40 text-neon-pink opacity-70 glitch-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8M11 11H3m0 0v8m0-8l8 8"></path></svg>
+                    </div>
+                </div>
+
+                <!-- Project 4: AI Content Generator -->
+                <div class="cyber-card project-card p-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-3xl text-neon-pink mb-3">Smart AI Content Generator</h3>
+                        <p class="text-lg mb-4">AI-Powered Writing Tool</p>
+                        <p class="mb-4 text-gray-300">
+                            A full-stack application integrating with the Gemini AI API to generate various types of content, including blog posts, summaries, and creative text.
+                        </p>
+                        <p class="text-sm text-neon-blue/80 mb-6">
+                            Tech: MERN Stack (MongoDB, Express, React, Node.js), Gemini AI API
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="https://github.com/Echohint/AI-Content-Generator" target="_blank" rel="noopener noreferrer" class="cyber-button">
+                                GitHub
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex justify-center items-center">
+                        <!-- Enhanced SVG Placeholder -->
+                        <svg class="w-40 h-40 text-neon-blue opacity-70 glitch" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-6.857 2.143L12 21l-2.143-6.857L3 12l6.857-2.143L12 3z"></path></svg>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills">
+            <h2 class="text-4xl font-bold text-center mb-12 text-neon-blue">Technical Skills</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="cyber-card p-6">
+                    <h3 class="text-2xl text-neon-pink mb-4">Languages</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>C++</li>
+                        <li>JavaScript</li>
+                        <li>Python</li>
+                    </ul>
+                </div>
+                
+                <div class="cyber-card p-6">
+                    <h3 class="text-2xl text-neon-pink mb-4">MERN Stack</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>React.js</li>
+                        <li>Node.js</li>
+                        <li>Express.js</li>
+                        <li>MongoDB</li>
+                    </ul>
+                </div>
+
+                <div class="cyber-card p-6">
+                    <h3 class="text-2xl text-neon-pink mb-4">Core CS & DSA</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Data Structures</li>
+                        <li>Algorithms</li>
+                        <li>OOPS</li>
+                        <li>DBMS</li>
+                        <li>Operating Systems</li>
+                    </ul>
+                </div>
+
+                <div class="cyber-card p-6">
+                    <h3 class="text-2xl text-neon-pink mb-4">Tools & Platforms</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Git & GitHub</li>
+                        <li>VS Code</li>
+                        <li>LeetCode</li>
+                        <li>Tailwind CSS</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects">
+            <h2 class="text-4xl font-bold text-center mb-12 text-neon-blue"> 03. Projects</h2>
+            <div class="space-y-12">
+                
+                <!-- Project 1: Psychocorp -->
+                <div class="cyber-card project-card p-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-3xl text-neon-pink mb-3">Psychocorp</h3>
+                        <p class="text-lg mb-4">Doctor Appointment Booking Website</p>
+                        <p class="mb-4 text-gray-300">
+                            A full-stack platform for patients to schedule appointments, attend secure consultations, and access medical records. Features JWT authentication, Razorpay integration, and a full admin dashboard for doctors.
+                        </p>
+                        <p class="text-sm text-neon-blue/80 mb-6">
+                            Tech: React.js, Tailwind CSS, Node.js, Express.js, MongoDB, Gemini AI API, Cloudinary, Razorpay
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="cyber-button">
+                                GitHub
+                            </a>
+                            <a href="#" class="cyber-button cyber-button-pink">
+                                Live Demo
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex justify-center items-center">
+                        <!-- Enhanced SVG Placeholder -->
+                        <svg class="w-40 h-40 text-neon-pink opacity-70 glitch-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Project 2: Food Factory -->
+                <div class="cyber-card project-card p-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-3xl text-neon-pink mb-3">Food Factory</h3>
+                        <p class="text-lg mb-4">Food Ordering Platform</p>
+                        <p class="mb-4 text-gray-300">
+                            A web app for students to order food from cafes with real-time delivery status. Features secure auth, live cart updates, category-wise navigation, and an admin dashboard for cafes.
+                        </p>
+                        <p class="text-sm text-neon-blue/80 mb-6">
+                            Tech: React.js, Tailwind CSS, Node.js, Express.js, MongoDB
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="#" class="cyber-button">
+                                GitHub
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex justify-center items-center">
+                        <!-- Enhanced SVG Placeholder -->
+                        <svg class="w-40 h-40 text-neon-blue opacity-70 glitch" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education Section -->
+        <section id="education">
+            <h2 class="text-4xl font-bold text-center mb-12 text-neon-blue">Education</h2>
+            <div class="cyber-card p-8">
+                <div class="relative pl-8 border-l-2 border-neon-pink/50">
+                    
+                    <!-- B.Tech -->
+                    <div class="mb-8 relative">
+                        <div class="absolute w-4 h-4 bg-neon-blue rounded-full -left-[1.5rem] border-4 border-black top-1"></div>
+                        <h3 class="text-2xl text-neon-pink">Bachelor of Technology, ECE</h3>
+                        <p class="text-lg mb-1">Motilal Nehru National Institute of Technology, Allahabad</p>
+                        <p class="text-sm text-gray-400">Nov 2022 - Present </p>
+                    </div>
+
+                    <!-- Senior Secondary -->
+                    <div class="mb-8 relative">
+                        <div class="absolute w-4 h-4 bg-neon-blue rounded-full -left-[1.5rem] border-4 border-black top-1"></div>
+                        <h3 class="text-2xl text-neon-pink">Senior Secondary (12th)</h3>
+                        <p class="text-lg mb-1">St. Joseph Senior Secondary School, Kasganj</p>
+                        <p class="text-sm text-gray-400">2020 - 2021 | 94%</p>
+                    </div>
+
+                    <!-- Secondary -->
+                    <div class="relative">
+                        <div class="absolute w-4 h-4 bg-neon-blue rounded-full -left-[1.5rem] border-4 border-black top-1"></div>
+                        <h3 class="text-2xl text-neon-pink">Secondary (10th)</h3>
+                        <p class="text-lg mb-1">St. Joseph Senior Secondary School, Kasganj</p>
+                        <p class="text-sm text-gray-400">2018 - 2019 | 94.6%</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievements & Responsibilities -->
+        <section id="achievements">
+            <h2 class="text-4xl font-bold text-center mb-12 text-neon-blue">Leadership & Achievements</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="cyber-card p-8">
+                    <h3 class="text-2xl text-neon-pink mb-4">Achievements</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Rated Knight on LeetCode (Rating 1892)</li>
+                        <li>Solved 800+ DSA Problems (LeetCode, GFG)</li>
+                        <li>Secured 5th position in Innodev, Avishkar 2024</li>
+                        <li>Represented college in Inter-NIT Kabaddi Tournament</li>
+                    </ul>
+                </div>
+                <div class="cyber-card p-8">
+                    <h3 class="text-2xl text-neon-pink mb-4">Positions of Responsibility</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Co-coordinator of Techno-Cultural Fest Culrav & Avishkar</li>
+                        <li>Captain of MNNIT Kabaddi Team for Inter-NIT</li>
+                        <li>Committee Coordinator of SWAGAT</li>
+                        <li>Member of Design Team at Robotics Club</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact">
+            <h2 class="text-4xl font-bold text-center mb-12 text-neon-blue">Get In Touch</h2>
+            <div class="cyber-card max-w-3xl mx-auto p-8 text-center">
+                <p class="text-xl mb-8">
+                    I'm always open to discussing new projects, creative ideas, or opportunities. My inbox is always open.
+                </p>
+                <!-- Enhanced mailto: Button -->
+                <a href="mailto:vishal5132996@gmail.com" class="cyber-button text-lg">
+                    <!-- Mail Icon -->
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2.003 5.884L10 11.884l7.997-6H2.003zM18 14.116V5.884l-8 6-8-6v8.232h16z"></path></svg>
+                    Send Email
+                </a>
+                
+                <!-- Professional Icon Links -->
+                <div class="flex justify-center space-x-10 mt-12">
+                    <a href="tel:+918630967725" class="contact-icon" title="Call Me">
+                        <!-- Phone Icon -->
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 3a1 1 0 011-1h1.74a1 1 0 01.98.7l.6 2.4a1 1 0 01-.28 1.09l-1.4 1.4a11.05 11.05 0 004.99 4.99l1.4-1.4a1 1 0 011.09-.28l2.4.6a1 1 0 01.7.98V17a1 1 0 01-1 1h-1.74a1 1 0 01-.98-.7l-.6-2.4a1 1 0 01.28-1.09l1.4-1.4a1.06 1.06 0 00-1.48-1.48l-1.4 1.4a1 1 0 01-1.09.28l-2.4-.6a1 1 0 01-.98-.7V4a1 1 0 011-1z"></path></svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/vishal-kumar-967b22259/" target="_blank" rel="noopener noreferrer" class="contact-icon" title="LinkedIn">
+                        <!-- LinkedIn Icon -->
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+    
+                    </a>
+                    <a href="https://github.com/Echohint" target="_blank" rel="noopener noreferrer" class="contact-icon contact-icon-pink" title="GitHub">
+                        <!-- GitHub Icon -->
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 mt-16 border-t border-neon-blue/20">
+        <p class="text-gray-500">
+            Designed & Built by Vishal Kumar.
+        </p>
+    </footer>
+
+    <script>
+        // 3D Background Scene
+        let scene, camera, renderer, stars, wireframeObject, bubbles;
+        let mouseX = 0, mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        function init3D() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 5;
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.getElementById('bg-canvas'),
+                alpha: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Remove the wireframe object
+            // const geometry = new THREE.IcosahedronGeometry(1.5, 0); // radius, detail
+            // const material = new THREE.MeshBasicMaterial({
+            //     color: 0x00f0ff, // Neon Blue
+            //     wireframe: true
+            // });
+            // wireframeObject = new THREE.Mesh(geometry, material);
+            // scene.add(wireframeObject);
+
+            // Add starfield
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 5000;
+            const posArray = new Float32Array(starCount * 3);
+            for (let i = 0; i < starCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 2000; // Spread stars
+            }
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const starMaterial = new THREE.PointsMaterial({
+                color: 0xff00ff, // Neon Pink
+                size: 1.5
+            });
+            stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+
+            // Add cursor-following bubbles (as wireframes)
+            const bubbleGeometry = new THREE.SphereGeometry(0.1, 6, 6); // radius, widthSegments, heightSegments (kept low for performance)
+            const bubbleMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00f0ff, // Neon Blue
+                wireframe: true,
+                transparent: true,
+                opacity: 0.5 // Set opacity level
+            });
+            
+            bubbles = new THREE.Group();
+            const bubbleCount = 100;
+
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubbleMesh = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
+                
+                // Set random positions
+                bubbleMesh.position.x = (Math.random() - 0.5) * 10; // Closer swarm
+                bubbleMesh.position.y = (Math.random() - 0.5) * 10;
+                bubbleMesh.position.z = (Math.random() - 0.5) * 10;
+
+                // Add some random rotation
+                bubbleMesh.rotation.x = Math.random() * 2 * Math.PI;
+                bubbleMesh.rotation.y = Math.random() * 2 * Math.PI;
+
+                bubbles.add(bubbleMesh);
+            }
+            scene.add(bubbles);
+
+
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('mousemove', onMouseMove, false);
+            animate();
+        }
+
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onMouseMove(event) {
+            mouseX = (event.clientX - windowHalfX) * 0.1;
+            mouseY = (event.clientY - windowHalfY) * 0.1;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Mouse follow animation
+            camera.position.x += (mouseX - camera.position.x) * 0.02;
+            camera.position.y += (-mouseY - camera.position.y) * 0.02;
+            camera.lookAt(scene.position);
+
+            // Animate wireframe object - REMOVED
+            // wireframeObject.rotation.x += 0.001;
+            // wireframeObject.rotation.y += 0.002;
+
+            // Animate stars
+            stars.rotation.y += 0.0002;
+            stars.rotation.x += 0.0001;
+
+            // Make bubbles follow mouse
+            if (bubbles) {
+                bubbles.rotation.y = (mouseX - camera.position.x) * 0.01;
+                bubbles.rotation.x = (mouseY - camera.position.y) * 0.01;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Typewriter Effect
+        function initTypewriter() {
+            const roles = ["Full-Stack Developer", "Competitive Programmer", "MERN Stack Expert"];
+            let roleIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            const typewriterElement = document.getElementById('typewriter');
+
+            function type() {
+                const currentRole = roles[roleIndex];
+                if (isDeleting) {
+                    typewriterElement.textContent = currentRole.substring(0, charIndex--);
+                } else {
+                    typewriterElement.textContent = currentRole.substring(0, charIndex++);
+                }
+
+                if (!isDeleting && charIndex === currentRole.length) {
+                    isDeleting = true;
+                    setTimeout(type, 2000); // Pause at end
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    roleIndex = (roleIndex + 1) % roles.length;
+                    setTimeout(type, 500); // Pause before new word
+                } else {
+                    setTimeout(type, isDeleting ? 50 : 150);
+                }
+            }
+            type();
+        }
+
+        // Smooth scroll for nav links
+        function initSmoothScroll() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.getAttribute('href').length > 1) {
+                        e.preventDefault();
+                        document.querySelector(this.getAttribute('href')).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Scroll Animation Observer
+        function initScrollObserver() {
+            const sections = document.querySelectorAll('section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                rootMargin: '0px',
+                threshold: 0.1
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        }
+
+        // Initialize all scripts
+        init3D();
+        initTypewriter();
+        initSmoothScroll();
+        initScrollObserver();
+    </script>
+</body>
+</html>
